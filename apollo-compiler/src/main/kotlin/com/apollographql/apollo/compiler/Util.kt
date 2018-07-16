@@ -1,6 +1,10 @@
 package com.apollographql.apollo.compiler
 
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.ir.TypeDeclaration
+import com.apollographql.apollo.compiler.java.Annotations
+import com.apollographql.apollo.compiler.java.BuilderTypeSpecBuilder
+import com.apollographql.apollo.compiler.java.ClassNames
 import com.squareup.javapoet.*
 import javax.lang.model.element.Modifier
 
@@ -495,6 +499,9 @@ fun Number.castTo(type: TypeName): Number {
     this
   }
 }
+
+fun List<TypeDeclaration>.supportedTypeDeclarations() =
+    filter { it.kind == TypeDeclaration.KIND_ENUM || it.kind == TypeDeclaration.KIND_INPUT_OBJECT_TYPE }
 
 object Util {
   const val RESPONSE_FIELD_MAPPER_TYPE_NAME: String = "Mapper"

@@ -1,7 +1,8 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.InputFieldMarshaller
 import com.apollographql.apollo.api.InputFieldWriter
+import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.TypeDeclarationField
 import com.squareup.javapoet.*
@@ -55,7 +56,7 @@ class InputTypeSpecBuilder(
           }
           .associate { it.name.decapitalize().escapeJavaReservedWord() to it.defaultValue }
       val javaDocs = fields
-          .filter { !it.description.isNullOrBlank() }
+          .filter { !it.description.isBlank() }
           .associate { it.name.decapitalize().escapeJavaReservedWord() to it.description }
       return addMethod(BuilderTypeSpecBuilder.builderFactoryMethod())
           .addType(
@@ -119,7 +120,7 @@ class InputTypeSpecBuilder(
           .addModifiers(Modifier.PUBLIC)
           .returns(field.javaTypeName(context).unwrapOptionalType())
           .let {
-            if (!field.description.isNullOrBlank())
+            if (!field.description.isBlank())
               it.addJavadoc(CodeBlock.of("\$L\n", field.description))
             else
               it

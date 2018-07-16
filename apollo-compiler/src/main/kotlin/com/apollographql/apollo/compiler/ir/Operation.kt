@@ -1,11 +1,5 @@
 package com.apollographql.apollo.compiler.ir
 
-import com.apollographql.apollo.api.Operation
-import com.apollographql.apollo.compiler.SchemaTypeSpecBuilder
-import com.apollographql.apollo.compiler.withBuilder
-import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Modifier
-
 data class Operation(
     val operationName: String,
     val operationType: String,
@@ -15,29 +9,7 @@ data class Operation(
     val filePath: String,
     val fragmentsReferenced: List<String>,
     val operationId: String
-
-) : CodeGenerator {
-
-  override fun toTypeSpec(context: CodeGenerationContext, abstract: Boolean): TypeSpec =
-      SchemaTypeSpecBuilder(
-          typeName = DATA_TYPE_NAME,
-          fields = fields,
-          fragmentSpreads = emptyList(),
-          inlineFragments = emptyList(),
-          context = context,
-          abstract = abstract
-      )
-          .build(Modifier.PUBLIC, Modifier.STATIC)
-          .toBuilder()
-          .addSuperinterface(Operation.Data::class.java)
-          .build()
-          .let {
-            if (context.generateModelBuilder) {
-              it.withBuilder()
-            } else {
-              it
-            }
-          }
+) {
 
   fun normalizedOperationName(useSemanticNaming: Boolean): String = when (operationType) {
     TYPE_MUTATION -> normalizedOperationName(useSemanticNaming, "Mutation")
@@ -61,9 +33,9 @@ data class Operation(
   fun isSubscription() = operationType == TYPE_SUBSCRIPTION
 
   companion object {
-    val DATA_TYPE_NAME = "Data"
-    val TYPE_MUTATION = "mutation"
-    val TYPE_QUERY = "query"
-    val TYPE_SUBSCRIPTION = "subscription"
+    const val DATA_TYPE_NAME = "Data"
+    const val TYPE_MUTATION = "mutation"
+    const val TYPE_QUERY = "query"
+    const val TYPE_SUBSCRIPTION = "subscription"
   }
 }

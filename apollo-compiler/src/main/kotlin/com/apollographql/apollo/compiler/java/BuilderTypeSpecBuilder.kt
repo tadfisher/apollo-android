@@ -1,5 +1,6 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
+import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.ir.TypeDeclaration
 import com.squareup.javapoet.*
 import java.util.*

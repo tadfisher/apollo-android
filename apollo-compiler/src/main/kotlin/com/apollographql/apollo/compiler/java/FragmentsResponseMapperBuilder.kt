@@ -1,9 +1,9 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.FragmentResponseFieldMapper
 import com.apollographql.apollo.api.ResponseReader
+import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
-import com.apollographql.apollo.compiler.ir.Fragment
 import com.squareup.javapoet.*
 import javax.lang.model.element.Modifier
 
@@ -73,7 +73,8 @@ class FragmentsResponseMapperBuilder(
   private fun initFragmentCode(fragmentField: FieldSpec): CodeBlock {
     val fieldClass = fragmentField.type.unwrapOptionalType(withoutAnnotations = true) as ClassName
     return CodeBlock.builder()
-        .beginControlFlow("if (\$T.\$L.contains(\$L))", fieldClass, Fragment.POSSIBLE_TYPES_VAR, CONDITIONAL_TYPE_VAR)
+        .beginControlFlow("if (\$T.\$L.contains(\$L))",
+            fieldClass, FragmentGenerator.POSSIBLE_TYPES_VAR, CONDITIONAL_TYPE_VAR)
         .addStatement("\$N = \$L.map(\$L)", fragmentField, fieldClass.mapperFieldName(), READER_VAR)
         .endControlFlow()
         .build()
@@ -107,14 +108,13 @@ class FragmentsResponseMapperBuilder(
           }
 
   companion object {
-    private val API_RESPONSE_FIELD_MAPPER_TYPE = ClassName.get(
-        FragmentResponseFieldMapper::class.java)
+    private val API_RESPONSE_FIELD_MAPPER_TYPE = ClassName.get(FragmentResponseFieldMapper::class.java)
     private val RESPONSE_FIELD_MAPPER_TYPE = ParameterizedTypeName.get(API_RESPONSE_FIELD_MAPPER_TYPE,
         SchemaTypeSpecBuilder.FRAGMENTS_FIELD.type.withoutAnnotations())
-    private val CONDITIONAL_TYPE_VAR = "conditionalType"
+    private const val CONDITIONAL_TYPE_VAR = "conditionalType"
     private val CONDITIONAL_TYPE_PARAM = ParameterSpec.builder(String::class.java, CONDITIONAL_TYPE_VAR)
         .addAnnotation(Annotations.NONNULL).build()
-    private val READER_VAR = "reader"
+    private const val READER_VAR = "reader"
     private val READER_PARAM = ParameterSpec.builder(ResponseReader::class.java, READER_VAR).build()
   }
 }

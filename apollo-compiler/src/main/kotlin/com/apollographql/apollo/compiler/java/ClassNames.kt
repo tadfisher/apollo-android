@@ -1,4 +1,4 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.*
 import com.apollographql.apollo.api.internal.Mutator

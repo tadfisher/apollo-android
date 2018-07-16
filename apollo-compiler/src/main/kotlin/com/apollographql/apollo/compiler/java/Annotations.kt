@@ -1,4 +1,4 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.CodeBlock

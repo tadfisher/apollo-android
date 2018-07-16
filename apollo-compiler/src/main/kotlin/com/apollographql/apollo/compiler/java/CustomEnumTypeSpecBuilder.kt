@@ -1,7 +1,8 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.ScalarType
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.toJavaType
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeSpec
@@ -12,7 +13,8 @@ class CustomEnumTypeSpecBuilder(
     val context: CodeGenerationContext
 ) {
   fun build(): TypeSpec =
-      TypeSpec.enumBuilder(className(context))
+      TypeSpec.enumBuilder(
+          className(context))
           .addAnnotation(Annotations.GENERATED_BY_APOLLO)
           .addSuperinterface(ScalarType::class.java)
           .addModifiers(Modifier.PUBLIC)
@@ -40,7 +42,7 @@ class CustomEnumTypeSpecBuilder(
               .addModifiers(Modifier.PUBLIC)
               .apply {
                 if (context.suppressRawTypesWarning) {
-                  this.addAnnotation(com.apollographql.apollo.compiler.Annotations.SUPPRESS_WARNINGS)
+                  this.addAnnotation(Annotations.SUPPRESS_WARNINGS)
                 }
               }
               .addAnnotation(Override::class.java)

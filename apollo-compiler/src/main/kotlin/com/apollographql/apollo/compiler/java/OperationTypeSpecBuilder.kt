@@ -1,8 +1,13 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.OperationName
 import com.apollographql.apollo.api.ResponseFieldMapper
-import com.apollographql.apollo.compiler.ir.*
+import com.apollographql.apollo.compiler.*
+import com.apollographql.apollo.compiler.NullableValueType.*
+import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.ir.Fragment
+import com.apollographql.apollo.compiler.ir.Operation
+import com.apollographql.apollo.compiler.ir.Variable
 import com.squareup.javapoet.*
 import javax.lang.model.element.Modifier
 
@@ -10,7 +15,7 @@ class OperationTypeSpecBuilder(
     val operation: Operation,
     val fragments: List<Fragment>,
     useSemanticNaming: Boolean
-) : CodeGenerator {
+) : JavaCodeGenerator {
   private val operationTypeName = operation.normalizedOperationName(useSemanticNaming)
   private val dataVarType = ClassName.get("", "$operationTypeName.Data")
 
@@ -28,7 +33,7 @@ class OperationTypeSpecBuilder(
         .addVariablesDefinition(operation.variables, newContext)
         .addResponseFieldMapperMethod()
         .addBuilder(context)
-        .addType(operation.toTypeSpec(newContext, abstract))
+        .addOperationType(operation, newContext, abstract)
         .addOperationName()
         .build()
         .flatten(excludeTypeNames = listOf(
@@ -73,10 +78,10 @@ class OperationTypeSpecBuilder(
         .addAnnotation(Annotations.OVERRIDE)
         .addModifiers(Modifier.PUBLIC)
         .returns(ClassNames.STRING)
-        .addStatement("return ${OPERATION_ID_FIELD_NAME}")
+        .addStatement("return $OPERATION_ID_FIELD_NAME")
         .build())
 
-    return this;
+    return this
   }
 
   private fun TypeSpec.Builder.addQueryDocumentDefinition(fragments: List<Fragment>,
@@ -86,7 +91,7 @@ class OperationTypeSpecBuilder(
       val className = ClassName.get(context.fragmentsPackage, it.formatClassName())
       initializeCodeBuilder
           .add(" + \$S\n", "\n")
-          .add(" + \$T.\$L", className, Fragment.FRAGMENT_DEFINITION_FIELD_NAME)
+          .add(" + \$T.\$L", className, FragmentGenerator.FRAGMENT_DEFINITION_FIELD_NAME)
     }
 
     addField(FieldSpec.builder(ClassNames.STRING, QUERY_DOCUMENT_FIELD_NAME)
@@ -112,14 +117,11 @@ class OperationTypeSpecBuilder(
         .addAnnotation(Override::class.java)
         .addParameter(ParameterSpec.builder(dataVarType, "data").build())
         .returns(wrapperType(context))
-        .addStatement(
-            if (context.nullableValueType == NullableValueType.JAVA_OPTIONAL) {
-              "return Optional.ofNullable(data)"
-            } else if (context.nullableValueType != NullableValueType.ANNOTATED) {
-              "return Optional.fromNullable(data)"
-            } else {
-              "return data"
-            })
+        .addStatement(when {
+          context.nullableValueType == JAVA_OPTIONAL -> "return Optional.ofNullable(data)"
+          context.nullableValueType != NullableValueType.ANNOTATED -> "return Optional.fromNullable(data)"
+          else -> "return data"
+        })
         .build()
   }
 
@@ -155,9 +157,9 @@ class OperationTypeSpecBuilder(
   }
 
   private fun wrapperType(context: CodeGenerationContext) = when (context.nullableValueType) {
-    NullableValueType.GUAVA_OPTIONAL -> ClassNames.parameterizedGuavaOptional(dataVarType)
-    NullableValueType.APOLLO_OPTIONAL -> ClassNames.parameterizedOptional(dataVarType)
-    NullableValueType.JAVA_OPTIONAL -> ClassNames.parameterizedJavaOptional(dataVarType)
+    GUAVA_OPTIONAL -> ClassNames.parameterizedGuavaOptional(dataVarType)
+    APOLLO_OPTIONAL -> ClassNames.parameterizedOptional(dataVarType)
+    JAVA_OPTIONAL -> ClassNames.parameterizedJavaOptional(dataVarType)
     else -> dataVarType
   }
 
@@ -241,6 +243,33 @@ class OperationTypeSpecBuilder(
     return this
   }
 
+  private fun TypeSpec.Builder.addOperationType(
+      operation: Operation,
+      context: CodeGenerationContext,
+      abstract: Boolean
+  ): TypeSpec.Builder {
+    val operationTypeSpec = SchemaTypeSpecBuilder(
+        typeName = Operation.DATA_TYPE_NAME,
+        fields = operation.fields,
+        fragmentSpreads = emptyList(),
+        inlineFragments = emptyList(),
+        context = context,
+        abstract = abstract
+    )
+        .build(Modifier.PUBLIC, Modifier.STATIC)
+        .toBuilder()
+        .addSuperinterface(com.apollographql.apollo.api.Operation.Data::class.java)
+        .build()
+        .let {
+          if (context.generateModelBuilder) {
+            it.withBuilder()
+          } else {
+            it
+          }
+        }
+    return addType(operationTypeSpec)
+  }
+
   private fun variablesType() =
       if (operation.variables.isNotEmpty())
         ClassName.get("", "$operationTypeName.Variables")
@@ -277,11 +306,11 @@ class OperationTypeSpecBuilder(
   }
 
   companion object {
-    private val OPERATION_DEFINITION_FIELD_NAME = "OPERATION_DEFINITION"
-    private val QUERY_DOCUMENT_FIELD_NAME = "QUERY_DOCUMENT"
-    private val OPERATION_ID_FIELD_NAME = "OPERATION_ID"
-    private val QUERY_DOCUMENT_ACCESSOR_NAME = "queryDocument"
-    private val OPERATION_ID_ACCESSOR_NAME = "operationId"
-    private val VARIABLES_VAR = "variables"
+    private const val OPERATION_DEFINITION_FIELD_NAME = "OPERATION_DEFINITION"
+    private const val QUERY_DOCUMENT_FIELD_NAME = "QUERY_DOCUMENT"
+    private const val OPERATION_ID_FIELD_NAME = "OPERATION_ID"
+    private const val QUERY_DOCUMENT_ACCESSOR_NAME = "queryDocument"
+    private const val OPERATION_ID_ACCESSOR_NAME = "operationId"
+    private const val VARIABLES_VAR = "variables"
   }
 }

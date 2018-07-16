@@ -1,9 +1,11 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.InputFieldMarshaller
 import com.apollographql.apollo.api.InputFieldWriter
+import com.apollographql.apollo.compiler.NullableValueType
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Variable
+import com.apollographql.apollo.compiler.isOptional
 import com.squareup.javapoet.*
 import java.io.IOException
 import java.util.*
@@ -92,11 +94,11 @@ class VariablesTypeSpecBuilder(
   }
 
   fun TypeSpec.Builder.builder(): TypeSpec.Builder {
-    if (variables.isEmpty()) {
-      return this
+    return if (variables.isEmpty()) {
+      this
     } else {
       val builderFields = variables.map { it.name.decapitalize() to it.javaTypeName(context) }
-      return addMethod(BuilderTypeSpecBuilder.builderFactoryMethod())
+      addMethod(BuilderTypeSpecBuilder.builderFactoryMethod())
           .addType(
               BuilderTypeSpecBuilder(
                   targetObjectClassName = VARIABLES_TYPE_NAME,
@@ -152,9 +154,9 @@ class VariablesTypeSpecBuilder(
   }
 
   companion object {
-    private val VARIABLES_CLASS_NAME: String = "Variables"
+    private const val VARIABLES_CLASS_NAME: String = "Variables"
     private val VARIABLES_TYPE_NAME: ClassName = ClassName.get("", VARIABLES_CLASS_NAME)
-    private val VALUE_MAP_FIELD_NAME = "valueMap"
+    private const val VALUE_MAP_FIELD_NAME = "valueMap"
     private val WRITER_PARAM = ParameterSpec.builder(InputFieldWriter::class.java, "writer").build()
     private const val MARSHALLER_PARAM_NAME = "marshaller"
   }

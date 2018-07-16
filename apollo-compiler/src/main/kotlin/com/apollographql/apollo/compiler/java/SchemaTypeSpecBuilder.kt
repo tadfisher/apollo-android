@@ -1,6 +1,7 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.*
+import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Field
 import com.apollographql.apollo.compiler.ir.InlineFragment
@@ -17,6 +18,9 @@ class SchemaTypeSpecBuilder(
     private val abstract: Boolean = false
 ) {
   private val uniqueTypeName = formatUniqueTypeName(typeName, context.reservedTypeNames)
+
+  private val fieldGenerators: MutableMap<Field, FieldGenerator> = mutableMapOf()
+  private val inlineFragmentGenerators: MutableMap<InlineFragment, InlineFragmentGenerator> = mutableMapOf()
 
   init {
     context.reservedTypeNames += uniqueTypeName
@@ -106,17 +110,11 @@ class SchemaTypeSpecBuilder(
         .withHashCodeImplementation()
   }
 
-  private fun fieldSpecs(nameOverrideMap: Map<String, String>): List<FieldSpec> {
-    return fields
-        .map { it.fieldSpec(context) }
-        .map { it.overrideType(nameOverrideMap) }
-  }
+  private fun fieldSpecs(nameOverrideMap: Map<String, String>): List<FieldSpec> =
+      fields.map { it.generator().fieldSpec(context).overrideType(nameOverrideMap) }
 
-  private fun fieldAccessorMethodSpecs(nameOverrideMap: Map<String, String>): List<MethodSpec> {
-    return fields
-        .map { it.accessorMethodSpec(context) }
-        .map { it.overrideReturnType(nameOverrideMap) }
-  }
+  private fun fieldAccessorMethodSpecs(nameOverrideMap: Map<String, String>): List<MethodSpec> =
+      fields.map { it.generator().accessorMethodSpec(context).overrideReturnType(nameOverrideMap) }
 
   private fun TypeSpec.Builder.addFragments(): TypeSpec.Builder {
     if (fragmentSpreads.isNotEmpty()) {
@@ -129,15 +127,18 @@ class SchemaTypeSpecBuilder(
 
   private fun nestedTypeSpecs(): List<Pair<String, TypeSpec>> {
     return fields.filter(Field::isNonScalar).map {
-      it.formatClassName() to it.toTypeSpec(
+      it.formatClassName() to it.generator().toTypeSpec(
           context = context,
           abstract = abstract || inlineFragments.isNotEmpty()
       )
     }
   }
 
-  private fun inlineFragmentsTypeSpecs(): List<Pair<String, TypeSpec>> =
-      inlineFragments.map { it.formatClassName() to it.toTypeSpec(context = context, abstract = false) }
+  private fun inlineFragmentsTypeSpecs(): List<Pair<String, TypeSpec>> {
+    return inlineFragments.map {
+      it.formatClassName() to it.generator().toTypeSpec(context = context, abstract = false)
+    }
+  }
 
   private fun fragmentsAccessorMethodSpec(): MethodSpec {
     val fragmentsName = FRAGMENTS_FIELD.name
@@ -285,7 +286,7 @@ class SchemaTypeSpecBuilder(
     }
 
     val responseFields = fields.map { irField ->
-      val fieldSpec = irField.fieldSpec(context).overrideType(nameOverrideMap)
+      val fieldSpec = irField.generator().fieldSpec(context).overrideType(nameOverrideMap)
       val normalizedFieldSpec = FieldSpec.builder(
           fieldSpec.type.unwrapOptionalType().withoutAnnotations(),
           fieldSpec.name
@@ -404,7 +405,7 @@ class SchemaTypeSpecBuilder(
   private fun inlineFragmentsResponseMapperSpec(nameOverrideMap: Map<String, String>,
       surrogateInlineFragmentType: TypeSpec): TypeSpec {
     val inlineFragments = inlineFragments.map { inlineFragment ->
-      val fieldSpec = inlineFragment.fieldSpec(context).overrideType(nameOverrideMap)
+      val fieldSpec = inlineFragment.generator().fieldSpec(context).overrideType(nameOverrideMap)
       val normalizedFieldSpec = FieldSpec.builder(
           fieldSpec.type.unwrapOptionalType().withoutAnnotations(),
           fieldSpec.name
@@ -497,6 +498,12 @@ class SchemaTypeSpecBuilder(
         .addStatement("return \$L", marshallerType)
         .build()
   }
+
+  private fun Field.generator() =
+      fieldGenerators.getOrPut(this) { FieldGenerator(this) }
+
+  private fun InlineFragment.generator() =
+      inlineFragmentGenerators.getOrPut(this) { InlineFragmentGenerator(this) }
 
   companion object {
     private val RESPONSE_FIELDS_PARAM =

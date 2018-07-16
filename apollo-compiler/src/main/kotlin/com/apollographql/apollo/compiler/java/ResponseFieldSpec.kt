@@ -1,8 +1,9 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.ResponseField
 import com.apollographql.apollo.api.ResponseReader
 import com.apollographql.apollo.api.ResponseWriter
+import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Condition
 import com.apollographql.apollo.compiler.ir.Field
@@ -65,10 +66,10 @@ class ResponseFieldSpec(
   private fun customTypeFactoryCode(irField: Field, factoryMethod: String): CodeBlock {
     val customScalarEnum = CustomEnumTypeSpecBuilder.className(context)
     val customScalarEnumConst = normalizeGraphQlType(irField.type).toUpperCase(Locale.ENGLISH)
-    return CodeBlock.of("\$T.\$L(\$S, \$S, \$L, \$L, \$T.\$L, \$L)", ResponseField::class.java,
-        factoryMethod,
-        irField.responseName, irField.fieldName, irField.argumentCodeBlock(), irField.isOptional(), customScalarEnum,
-        customScalarEnumConst, conditionsCodeBlock(irField))
+    val generator = FieldGenerator(irField)
+    return CodeBlock.of("\$T.\$L(\$S, \$S, \$L, \$L, \$T.\$L, \$L)", ResponseField::class.java, factoryMethod,
+        irField.responseName, irField.fieldName, generator.argumentCodeBlock(), irField.isOptional(),
+        customScalarEnum, customScalarEnumConst, conditionsCodeBlock(irField))
   }
 
   private fun fragmentFactoryCode(irField: Field, factoryMethod: String, typeConditions: List<String>): CodeBlock {
@@ -86,8 +87,9 @@ class ResponseFieldSpec(
   }
 
   private fun genericFactoryCode(irField: Field, factoryMethod: String): CodeBlock {
+    val generator = FieldGenerator(irField)
     return CodeBlock.of("\$T.\$L(\$S, \$S, \$L, \$L, \$L)", ResponseField::class.java, factoryMethod,
-        irField.responseName, irField.fieldName, irField.argumentCodeBlock(), irField.isOptional(),
+        irField.responseName, irField.fieldName, generator.argumentCodeBlock(), irField.isOptional(),
         conditionsCodeBlock(irField))
   }
 
@@ -171,15 +173,15 @@ class ResponseFieldSpec(
     }
 
     fun readList(): CodeBlock {
-      val rawFieldType = rawFieldType.listParamType()
-      val readItemCode = readListItemStatement(rawFieldType)
+      val fieldType = rawFieldType.listParamType()
+      val readItemCode = readListItemStatement(fieldType)
       val listItemReaderTypeSpec = TypeSpec.anonymousClassBuilder("")
-          .superclass(responseFieldListItemReaderType(rawFieldType))
+          .superclass(responseFieldListItemReaderType(fieldType))
           .addMethod(MethodSpec
               .methodBuilder("read")
               .addModifiers(Modifier.PUBLIC)
               .addAnnotation(Override::class.java)
-              .returns(rawFieldType)
+              .returns(fieldType)
               .addParameter(RESPONSE_LIST_ITEM_READER_PARAM)
               .addCode(readItemCode)
               .build())
@@ -447,6 +449,6 @@ class ResponseFieldSpec(
         ParameterSpec.builder(ResponseWriter.ListItemWriter::class.java, "listItemWriter").build()
 
     private val FRAGMENTS_CLASS = ClassName.get("", "Fragments")
-    private val CONDITIONAL_TYPE_VAR = "conditionalType"
+    private const val CONDITIONAL_TYPE_VAR = "conditionalType"
   }
 }

@@ -1,6 +1,7 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.InputFieldWriter
+import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.squareup.javapoet.*
 import java.io.IOException
@@ -122,7 +123,7 @@ class InputFieldSpec(
 
     fun writeObject(): CodeBlock {
       return CodeBlock.of("\$L.writeObject(\$L != null ? \$L.\$L : null);\n", LIST_ITEM_WRITER_PARAM.name, itemParam,
-          itemParam, marshaller);
+          itemParam, marshaller)
     }
 
     return when {

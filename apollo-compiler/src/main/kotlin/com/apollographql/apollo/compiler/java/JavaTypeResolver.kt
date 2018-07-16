@@ -1,11 +1,13 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
-import com.apollographql.apollo.compiler.ClassNames.parameterizedGuavaOptional
-import com.apollographql.apollo.compiler.ClassNames.parameterizedInputType
-import com.apollographql.apollo.compiler.ClassNames.parameterizedJavaOptional
-import com.apollographql.apollo.compiler.ClassNames.parameterizedOptional
+import com.apollographql.apollo.compiler.java.ClassNames.parameterizedGuavaOptional
+import com.apollographql.apollo.compiler.java.ClassNames.parameterizedInputType
+import com.apollographql.apollo.compiler.java.ClassNames.parameterizedJavaOptional
+import com.apollographql.apollo.compiler.java.ClassNames.parameterizedOptional
+import com.apollographql.apollo.compiler.NullableValueType
 import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.ScalarType
+import com.apollographql.apollo.compiler.toJavaType
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName
 
@@ -20,7 +22,8 @@ class JavaTypeResolver(
     val isList = normalizedTypeName.startsWith('[') && normalizedTypeName.endsWith(']')
     val customScalarType = context.customTypeMap[normalizedTypeName]
     val javaType = when {
-      isList -> ClassNames.parameterizedListOf(resolve(normalizedTypeName.removeSurrounding("[", "]"), false))
+      isList -> ClassNames.parameterizedListOf(
+          resolve(normalizedTypeName.removeSurrounding("[", "]"), false))
       normalizedTypeName == ScalarType.STRING.name -> ClassNames.STRING
       normalizedTypeName == ScalarType.INT.name -> if (isOptional) TypeName.INT.box() else TypeName.INT
       normalizedTypeName == ScalarType.BOOLEAN.name -> if (isOptional) TypeName.BOOLEAN.box() else TypeName.BOOLEAN
@@ -29,22 +32,18 @@ class JavaTypeResolver(
       else -> ClassName.get(packageName, normalizedTypeName)
     }
 
-    return if (javaType.isPrimitive) {
-      javaType.let { if (deprecated) it.annotated(Annotations.DEPRECATED) else it }
-    } else if (isOptional) {
-      when (nullableValueType ?: context.nullableValueType) {
+    return when {
+      javaType.isPrimitive -> javaType
+      isOptional -> when (nullableValueType ?: context.nullableValueType) {
         NullableValueType.APOLLO_OPTIONAL -> parameterizedOptional(javaType)
         NullableValueType.GUAVA_OPTIONAL -> parameterizedGuavaOptional(javaType)
         NullableValueType.JAVA_OPTIONAL -> parameterizedJavaOptional(javaType)
         NullableValueType.INPUT_TYPE -> parameterizedInputType(javaType)
         else -> javaType.annotated(Annotations.NULLABLE)
-      }.let {
-        if (deprecated) it.annotated(Annotations.DEPRECATED) else it
       }
-    } else {
-      javaType.annotated(Annotations.NONNULL).let {
-        if (deprecated) it.annotated(Annotations.DEPRECATED) else it
-      }
+      else -> javaType.annotated(Annotations.NONNULL)
+    }.let {
+      if (deprecated) it.annotated(Annotations.DEPRECATED) else it
     }
   }
 }

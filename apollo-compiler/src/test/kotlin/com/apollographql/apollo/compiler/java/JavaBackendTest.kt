@@ -1,5 +1,10 @@
-package com.apollographql.apollo.compiler
+package com.apollographql.apollo.compiler.java
 
+import com.apollographql.apollo.compiler.GraphQLCompiler
+import com.apollographql.apollo.compiler.NullableValueType
+import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.toCodeGenerationContext
+import com.google.common.graph.Graph
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.compile.JavaFileObjects
@@ -14,13 +19,13 @@ import java.util.*
 import javax.tools.JavaFileObject
 
 @RunWith(Parameterized::class)
-class CodeGenTest(val pkgName: String, val args: GraphQLCompiler.Arguments) {
+class JavaBackendTest(val pkgName: String, val args: GraphQLCompiler.Arguments) {
   private val expectedFileMatcher = FileSystems.getDefault().getPathMatcher("glob:**.java")
   private val sourceFileObjects: MutableList<JavaFileObject> = ArrayList()
 
   @Test
   fun generateExpectedClasses() {
-    GraphQLCompiler().write(args)
+    JavaBackend().writeFiles(args.toCodeGenerationContext(), args.outputDir)
     Files.walkFileTree(args.irFile.parentFile.toPath(), object : SimpleFileVisitor<Path>() {
       override fun visitFile(expectedFile: Path, attrs: BasicFileAttributes): FileVisitResult {
         if (expectedFileMatcher.matches(expectedFile)) {
