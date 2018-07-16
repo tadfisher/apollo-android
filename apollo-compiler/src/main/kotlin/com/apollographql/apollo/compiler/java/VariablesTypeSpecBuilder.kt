@@ -3,7 +3,7 @@ package com.apollographql.apollo.compiler.java
 import com.apollographql.apollo.api.InputFieldMarshaller
 import com.apollographql.apollo.api.InputFieldWriter
 import com.apollographql.apollo.compiler.NullableValueType
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Variable
 import com.apollographql.apollo.compiler.isOptional
 import com.squareup.javapoet.*

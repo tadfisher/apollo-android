@@ -2,7 +2,7 @@ package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.compiler.Util
 import com.apollographql.apollo.compiler.flatten
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Fragment
 import com.apollographql.apollo.compiler.withBuilder
 import com.squareup.javapoet.ClassName

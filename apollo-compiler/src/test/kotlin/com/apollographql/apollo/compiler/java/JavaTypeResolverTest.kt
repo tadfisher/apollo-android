@@ -1,7 +1,7 @@
 package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.compiler.NullableValueType
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.CodeGenerationIR
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.TypeName

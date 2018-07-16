@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.apollographql.apollo.compiler.ir
 
 data class Operation(

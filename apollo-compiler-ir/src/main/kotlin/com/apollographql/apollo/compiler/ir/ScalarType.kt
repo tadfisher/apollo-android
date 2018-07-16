@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.apollographql.apollo.compiler.ir
 
 sealed class ScalarType(val name: String) {

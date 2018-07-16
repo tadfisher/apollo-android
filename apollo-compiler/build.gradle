@@ -12,8 +12,8 @@ sourceSets {
 dependencies {
   compile dep.javaPoet
   compile dep.kotlinStdLib
-  compile dep.moshi
   compile project(":apollo-api")
+  compile project(":apollo-compiler-ir")
 
   testCompile dep.junit
   testCompile dep.truth

@@ -2,9 +2,7 @@ package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.compiler.GraphQLCompiler
 import com.apollographql.apollo.compiler.NullableValueType
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
 import com.apollographql.apollo.compiler.toCodeGenerationContext
-import com.google.common.graph.Graph
 import com.google.common.truth.Truth.assertAbout
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.compile.JavaFileObjects

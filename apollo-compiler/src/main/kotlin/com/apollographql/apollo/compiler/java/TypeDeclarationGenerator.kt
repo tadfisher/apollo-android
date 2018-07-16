@@ -1,7 +1,7 @@
 package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.compiler.escapeJavaReservedWord
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.TypeDeclaration
 import com.apollographql.apollo.compiler.ir.TypeDeclaration.Companion.ENUM_SAFE_VALUE_OF
 import com.apollographql.apollo.compiler.ir.TypeDeclaration.Companion.ENUM_UNKNOWN_CONSTANT

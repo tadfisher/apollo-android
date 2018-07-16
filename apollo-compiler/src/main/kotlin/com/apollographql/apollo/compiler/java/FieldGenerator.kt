@@ -1,7 +1,7 @@
 package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.compiler.escapeJavaReservedWord
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Field
 import com.apollographql.apollo.compiler.ir.ScalarType
 import com.apollographql.apollo.compiler.toJavaBeansSemanticNaming
@@ -64,10 +64,10 @@ class FieldGenerator(val field: Field) : JavaCodeGenerator {
   }
 
   fun argumentCodeBlock(): CodeBlock {
-    if (field.args == null || field.args.isEmpty()) return CodeBlock.of("null")
+    val args = field.args.takeIf { it != null && it.isNotEmpty() } ?: return CodeBlock.of("null")
 
     val mapBuilderClass = ClassNames.parameterizedUnmodifiableMapBuilderOf(String::class.java, Any::class.java)
-    return field.args
+    return args
         .map { (name, value, type) ->
           @Suppress("UNCHECKED_CAST")
           when (value) {
@@ -84,7 +84,7 @@ class FieldGenerator(val field: Field) : JavaCodeGenerator {
             else -> CodeBlock.of(".put(\$S, \$S)\n", name, value)
           }
         }
-        .fold(CodeBlock.builder().add("new \$T(\$L)\n", mapBuilderClass, field.args.size), CodeBlock.Builder::add)
+        .fold(CodeBlock.builder().add("new \$T(\$L)\n", mapBuilderClass, args.size), CodeBlock.Builder::add)
         .add(".build()")
         .build()
   }

@@ -3,7 +3,7 @@ package com.apollographql.apollo.compiler.java
 import com.apollographql.apollo.api.FragmentResponseFieldMapper
 import com.apollographql.apollo.api.ResponseReader
 import com.apollographql.apollo.compiler.*
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.squareup.javapoet.*
 import javax.lang.model.element.Modifier
 

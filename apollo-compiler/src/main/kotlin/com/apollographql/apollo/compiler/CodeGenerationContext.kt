@@ -1,6 +1,7 @@
-package com.apollographql.apollo.compiler.ir
+package com.apollographql.apollo.compiler
 
-import com.apollographql.apollo.compiler.NullableValueType
+import com.apollographql.apollo.compiler.ir.CodeGenerationIR
+import com.apollographql.apollo.compiler.ir.TypeDeclaration
 
 data class CodeGenerationContext(
     var reservedTypeNames: List<String>,

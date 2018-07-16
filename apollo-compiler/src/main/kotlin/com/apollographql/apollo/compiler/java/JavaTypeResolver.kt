@@ -5,7 +5,7 @@ import com.apollographql.apollo.compiler.java.ClassNames.parameterizedInputType
 import com.apollographql.apollo.compiler.java.ClassNames.parameterizedJavaOptional
 import com.apollographql.apollo.compiler.java.ClassNames.parameterizedOptional
 import com.apollographql.apollo.compiler.NullableValueType
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.ScalarType
 import com.apollographql.apollo.compiler.toJavaType
 import com.squareup.javapoet.ClassName

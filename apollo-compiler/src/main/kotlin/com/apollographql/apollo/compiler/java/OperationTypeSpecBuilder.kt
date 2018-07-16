@@ -4,7 +4,7 @@ import com.apollographql.apollo.api.OperationName
 import com.apollographql.apollo.api.ResponseFieldMapper
 import com.apollographql.apollo.compiler.*
 import com.apollographql.apollo.compiler.NullableValueType.*
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Fragment
 import com.apollographql.apollo.compiler.ir.Operation
 import com.apollographql.apollo.compiler.ir.Variable

@@ -2,7 +2,7 @@ package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.compiler.Backend
 import com.apollographql.apollo.compiler.formatPackageName
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.ScalarType
 import com.apollographql.apollo.compiler.ir.TypeDeclaration
 import com.apollographql.apollo.compiler.supportedTypeDeclarations

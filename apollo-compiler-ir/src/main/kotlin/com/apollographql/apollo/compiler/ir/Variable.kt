@@ -1,8 +1,10 @@
+@file:Suppress("unused")
+
 package com.apollographql.apollo.compiler.ir
 
 data class Variable(
     val name: String,
     val type: String
 ) {
-  fun optional(): Boolean = !type.endsWith(suffix = "!")
+  fun isOptional(): Boolean = !type.endsWith(suffix = "!")
 }

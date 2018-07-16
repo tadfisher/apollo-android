@@ -1,9 +1,7 @@
 package com.apollographql.apollo.compiler
 
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
-import com.apollographql.apollo.compiler.ir.CodeGenerationIR
+import com.apollographql.apollo.compiler.ir.Parser
 import com.apollographql.apollo.compiler.java.JavaBackend
-import com.squareup.moshi.Moshi
 import java.io.File
 
 class GraphQLCompiler {
@@ -46,8 +44,7 @@ class GraphQLCompiler {
 }
 
 internal fun GraphQLCompiler.Arguments.toCodeGenerationContext(): CodeGenerationContext {
-  val irAdapter = Moshi.Builder().build().adapter(CodeGenerationIR::class.java)
-  val ir = irAdapter.fromJson(irFile.readText())!!
+  val ir = Parser.parse(irFile)
   val fragmentsPackage = if (irPackageName.isNotEmpty()) "$irPackageName.fragment" else "fragment"
   val typesPackage = if (irPackageName.isNotEmpty()) "$irPackageName.type" else "type"
   return CodeGenerationContext(

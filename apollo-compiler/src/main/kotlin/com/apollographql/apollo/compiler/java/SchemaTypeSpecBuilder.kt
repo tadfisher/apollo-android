@@ -2,7 +2,7 @@ package com.apollographql.apollo.compiler.java
 
 import com.apollographql.apollo.api.*
 import com.apollographql.apollo.compiler.*
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.Field
 import com.apollographql.apollo.compiler.ir.InlineFragment
 import com.squareup.javapoet.*
@@ -415,10 +415,8 @@ class SchemaTypeSpecBuilder(
           fieldSpec = fieldSpec,
           normalizedFieldSpec = normalizedFieldSpec,
           responseFieldType = ResponseField.Type.INLINE_FRAGMENT,
-          typeConditions = if (inlineFragment.possibleTypes != null && !inlineFragment.possibleTypes.isEmpty())
-            inlineFragment.possibleTypes
-          else
-            listOf(inlineFragment.typeCondition),
+          typeConditions = inlineFragment.possibleTypes.takeIf { it != null && it.isNotEmpty() }
+              ?: listOf(inlineFragment.typeCondition),
           context = context
       )
     }

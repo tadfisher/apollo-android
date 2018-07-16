@@ -1,11 +1,6 @@
-package com.apollographql.apollo.compiler.ir
+@file:Suppress("unused")
 
-import com.apollographql.apollo.compiler.*
-import com.apollographql.apollo.compiler.java.ClassNames
-import com.apollographql.apollo.compiler.java.JavaTypeResolver
-import com.apollographql.apollo.compiler.java.SchemaTypeSpecBuilder
-import com.squareup.javapoet.*
-import javax.lang.model.element.Modifier
+package com.apollographql.apollo.compiler.ir
 
 data class Field(
     val responseName: String,
@@ -53,6 +48,6 @@ data class Field(
   }
 
   companion object {
-    val TYPE_NAME_FIELD = Field(responseName = "__typename", fieldName = "__typename", type = "String!")
+    @JvmField val TYPE_NAME_FIELD = Field(responseName = "__typename", fieldName = "__typename", type = "String!")
   }
 }

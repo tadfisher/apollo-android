@@ -1,6 +1,6 @@
 package com.apollographql.apollo.compiler.java
 
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.CodeGenerationContext
 import com.apollographql.apollo.compiler.ir.InlineFragment
 import com.apollographql.apollo.compiler.withBuilder
 import com.squareup.javapoet.FieldSpec

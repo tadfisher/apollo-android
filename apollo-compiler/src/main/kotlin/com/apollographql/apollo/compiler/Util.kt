@@ -1,11 +1,12 @@
 package com.apollographql.apollo.compiler
 
-import com.apollographql.apollo.compiler.ir.CodeGenerationContext
+import com.apollographql.apollo.compiler.ir.Field
 import com.apollographql.apollo.compiler.ir.TypeDeclaration
 import com.apollographql.apollo.compiler.java.Annotations
 import com.apollographql.apollo.compiler.java.BuilderTypeSpecBuilder
 import com.apollographql.apollo.compiler.java.ClassNames
 import com.squareup.javapoet.*
+import java.io.File
 import javax.lang.model.element.Modifier
 
 private val JAVA_RESERVED_WORDS = arrayOf(
@@ -502,6 +503,15 @@ fun Number.castTo(type: TypeName): Number {
 
 fun List<TypeDeclaration>.supportedTypeDeclarations() =
     filter { it.kind == TypeDeclaration.KIND_ENUM || it.kind == TypeDeclaration.KIND_INPUT_OBJECT_TYPE }
+
+fun String.formatPackageName(): String {
+  val parts = split(File.separatorChar)
+  (parts.size - 1 downTo 2)
+      .filter { parts[it - 2] == "src" && parts[it] == "graphql" }
+      .forEach { return parts.subList(it + 1, parts.size).dropLast(1).joinToString(".") }
+  throw IllegalArgumentException("Files must be organized like src/main/graphql/...")
+}
+
 
 object Util {
   const val RESPONSE_FIELD_MAPPER_TYPE_NAME: String = "Mapper"
